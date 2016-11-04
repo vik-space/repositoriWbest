@@ -1,5 +1,8 @@
 $(function() {
+    $(function() {
+        Grid.init();
+    });
 
-	// Custom JS
+    new UISearch( document.getElementById( 'sb-search' ) );
 
 });
