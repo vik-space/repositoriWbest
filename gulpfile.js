@@ -28,7 +28,7 @@ gulp.task('browser-sync', function() {
 });
 
 gulp.task('sass', ['headersass'], function() {
-	return gulp.src('app/sass/**/*.sass')
+	return gulp.src('app/sass/**/**/*.sass')
 		.pipe(sass({
 			includePaths: bourbon.includePaths
 		}).on("error", notify.onError()))
@@ -36,6 +36,20 @@ gulp.task('sass', ['headersass'], function() {
 		.pipe(autoprefixer(['last 15 versions']))
 		.pipe(cleanCSS())
         .pipe(gcmq())
+		.pipe(gulp.dest('app/css'))
+		.pipe(browserSync.reload({stream: true}))
+});
+
+gulp.task('libs_css', function () {
+	return gulp.src([
+		'app/libs_style/FAQ/style.css',
+		'app/libs_style/FAQ/reset.css',
+		'app/libs_style/SearchBar/component.css',
+		'app/libs_style/SearchBar/default.css',
+		'app/libs_style/ThumbnailGrid/component.css',
+		'app/libs_style/ThumbnailGrid/default.css',
+	])
+		.pipe(concat('libs_css.min.css'))
 		.pipe(gulp.dest('app/css'))
 		.pipe(browserSync.reload({stream: true}))
 });
@@ -55,6 +69,12 @@ gulp.task('headersass', function() {
 gulp.task('libs', function() {
 	return gulp.src([
 		'app/libs/jquery/dist/jquery.min.js',
+		'app/libs/FAQ/js/modernizr.js',
+		'app/libs/FAQ/js/jquery.mobile.custom.min.js',
+		'app/libs/FAQ/js/main.js',
+		'app/libs/SearchBar/js/classie.js',
+		'app/libs/SearchBar/js/uisearch.js',
+		'app/libs/ThumbnailGrid/js/grid.js',
 		// 'app/libs/magnific-popup/magnific-popup.min.js'
 		])
 		.pipe(concat('libs.min.js'))
@@ -62,9 +82,10 @@ gulp.task('libs', function() {
 		.pipe(gulp.dest('app/js'));
 });
 
-gulp.task('watch', ['sass', 'libs', 'browser-sync'], function() {
+gulp.task('watch', ['sass', 'libs', 'browser-sync', 'libs_css'], function() {
 	gulp.watch('app/header.sass', ['headersass']);
 	gulp.watch('app/sass/**/*.sass', ['sass']);
+	gulp.watch('app/libs_style/**/*.css', ['libs_css']);
 	gulp.watch('app/*.html', browserSync.reload);
 	gulp.watch('app/js/**/*.js', browserSync.reload);
 });
@@ -91,11 +112,12 @@ gulp.task('buildhtml', function() {
 
 gulp.task('removedist', function() { return del.sync('dist'); });
 
-gulp.task('build', ['removedist', 'buildhtml', 'imagemin', 'sass', 'libs'], function() {
+gulp.task('build', ['removedist', 'buildhtml', 'imagemin', 'sass', 'libs', 'libs_css'], function() {
 
 	var buildCss = gulp.src([
 		'app/css/fonts.min.css',
-		'app/css/main.min.css'
+		'app/css/main.min.css',
+		'app/css/libs_css.min.css'
 		]).pipe(gulp.dest('dist/css'));
 
 	var buildFiles = gulp.src([
@@ -105,6 +127,10 @@ gulp.task('build', ['removedist', 'buildhtml', 'imagemin', 'sass', 'libs'], func
 	var buildFonts = gulp.src('app/fonts/**/*').pipe(gulp.dest('dist/fonts'));
 
 	var buildJs = gulp.src('app/js/**/*').pipe(gulp.dest('dist/js'));
+
+	var buildLibs = gulp.src('app/libs/**/*').pipe(gulp.dest('dist/libs'));
+
+	var buildSass = gulp.src('app/sass/**/*').pipe(gulp.dest('dist/sass'));
 
 });
 
